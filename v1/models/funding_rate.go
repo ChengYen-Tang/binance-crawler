@@ -2,7 +2,7 @@ package models
 
 import "context"
 
-type FundingRateModel struct {
+type FundingRate struct {
 	Symbol      string `json:"symbol"`
 	FundingRate string `json:"fundingRate"`
 	FundingTime int64  `json:"fundingTime"`
@@ -10,13 +10,21 @@ type FundingRateModel struct {
 }
 
 type FundingRateWorkIten struct {
-	FundingRate *FundingRateModel
+	apiName        *string
+	symbol         *string
+	FundingRate    *FundingRate
+	insertFunction func(apiName *string, symbol *string, fundingRate *FundingRate, ctx context.Context) error
 }
 
-func (f *FundingRateModel) CreateWorkItem() IWorkItem {
-	return &FundingRateWorkIten{FundingRate: f}
+func NewFundingRateWorkIten(apiName *string, symbol *string, fundingRate *FundingRate, insertFunction func(apiName *string, symbol *string, fundingRate *FundingRate, ctx context.Context) error) *FundingRateWorkIten {
+	return &FundingRateWorkIten{
+		apiName:        apiName,
+		symbol:         symbol,
+		FundingRate:    fundingRate,
+		insertFunction: insertFunction,
+	}
 }
 
-func (f *FundingRateWorkIten) Run(ctx context.Context) {
-	// do something
+func (f *FundingRateWorkIten) Run(ctx context.Context) error {
+	return f.insertFunction(f.apiName, f.symbol, f.FundingRate, ctx)
 }

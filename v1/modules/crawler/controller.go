@@ -1,7 +1,7 @@
 package crawler
 
 import (
-	"github.com/ChengYen-Tang/binance-crawler/models"
+	models "github.com/ChengYen-Tang/binance-crawler/models/interface"
 )
 
 // Controller is a struct for controlling the crawler

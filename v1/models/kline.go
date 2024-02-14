@@ -17,21 +17,21 @@ type Kline struct {
 }
 
 type KlineWorkIten struct {
-	Kline *Kline
+	apiName        *string
+	symbol         *string
+	kline          *Kline
+	insertFunction func(apiName *string, symbol *string, kline *Kline, ctx context.Context) error
 }
 
-func (k *Kline) CreateSpotKlineWorkItem() IWorkItem {
-	return &KlineWorkIten{Kline: k}
+func NewKlineWorkIten(apiName *string, symbol *string, kline *Kline, insertFunction func(apiName *string, symbol *string, kline *Kline, ctx context.Context) error) *KlineWorkIten {
+	return &KlineWorkIten{
+		apiName:        apiName,
+		symbol:         symbol,
+		kline:          kline,
+		insertFunction: insertFunction,
+	}
 }
 
-func (k *Kline) CreateFuturesKlineWorkItem() IWorkItem {
-	return &KlineWorkIten{Kline: k}
-}
-
-func (k *Kline) CreatePremiumIndexKlineWorkItem() IWorkItem {
-	return &KlineWorkIten{Kline: k}
-}
-
-func (k *KlineWorkIten) Run(ctx context.Context) {
-	// do something
+func (k *KlineWorkIten) Run(ctx context.Context) error {
+	return k.insertFunction(k.apiName, k.symbol, k.kline, ctx)
 }
