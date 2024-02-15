@@ -1,7 +1,7 @@
 package go_binance
 
 import (
-	"github.com/ChengYen-Tang/binance-crawler/modules/crawler"
+	crawler "github.com/ChengYen-Tang/binance-crawler/modules/crawler/interface"
 	"github.com/adshao/go-binance/v2"
 	"github.com/adshao/go-binance/v2/futures"
 )

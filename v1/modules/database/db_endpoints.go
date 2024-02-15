@@ -6,6 +6,12 @@ type DBEndpoints struct {
 	dbInstance database.IDatabase
 }
 
+func NewEndpoints(dbInstance database.IDatabase) *DBEndpoints {
+	return &DBEndpoints{
+		dbInstance: dbInstance,
+	}
+}
+
 func (endpoint *DBEndpoints) IsTableExist(apiName *string, symbol *string) (bool, error) {
 	return endpoint.dbInstance.IsTableExist(apiName, symbol)
 }
