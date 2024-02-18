@@ -3,17 +3,25 @@ package models
 import "context"
 
 type FundingRate struct {
-	Symbol      string `json:"symbol"`
 	FundingRate string `json:"fundingRate"`
 	FundingTime int64  `json:"fundingTime"`
-	Time        int64  `json:"time"`
+	MarkPrice   int64  `json:"markPrice"`
 }
+
+const FundingRateIndex = "FundingTime"
 
 type FundingRateWorkIten struct {
 	apiName        *string
 	symbol         *string
 	FundingRate    *FundingRate
 	insertFunction func(apiName *string, symbol *string, fundingRate *FundingRate, ctx context.Context) error
+}
+
+type FundingRatesWorkIten struct {
+	apiName        *string
+	symbol         *string
+	FundingRates   *[]FundingRate
+	insertFunction func(apiName *string, symbol *string, fundingRates *[]FundingRate, ctx context.Context) error
 }
 
 func NewFundingRateWorkIten(apiName *string, symbol *string, fundingRate *FundingRate, insertFunction func(apiName *string, symbol *string, fundingRate *FundingRate, ctx context.Context) error) *FundingRateWorkIten {
@@ -25,6 +33,19 @@ func NewFundingRateWorkIten(apiName *string, symbol *string, fundingRate *Fundin
 	}
 }
 
+func NewFundingRatesWorkIten(apiName *string, symbol *string, fundingRates *[]FundingRate, insertFunction func(apiName *string, symbol *string, fundingRates *[]FundingRate, ctx context.Context) error) *FundingRatesWorkIten {
+	return &FundingRatesWorkIten{
+		apiName:        apiName,
+		symbol:         symbol,
+		FundingRates:   fundingRates,
+		insertFunction: insertFunction,
+	}
+}
+
 func (f *FundingRateWorkIten) Run(ctx context.Context) error {
 	return f.insertFunction(f.apiName, f.symbol, f.FundingRate, ctx)
+}
+
+func (f *FundingRatesWorkIten) Run(ctx context.Context) error {
+	return f.insertFunction(f.apiName, f.symbol, f.FundingRates, ctx)
 }

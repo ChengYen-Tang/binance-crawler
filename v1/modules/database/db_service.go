@@ -20,17 +20,26 @@ func NewService(channel *chan models.IWorkItem) *DBService {
 
 func (service *DBService) Run(ctx context.Context) {
 	for val := range *service.channel {
-		error := val.Run(ctx)
-		fmt.Println("DBService: ", error)
-		for error != nil {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				error = val.Run(ctx)
-				fmt.Println("DBService: ", error)
-			}
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			service.retry(ctx, val)
+		}
+	}
+}
+
+func (service *DBService) retry(ctx context.Context, val models.IWorkItem) {
+	error := val.Run(ctx)
+	for error != nil {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			fmt.Println("DBService error:", error)
+			fmt.Println("Waiting for 10 seconds, then retry...")
 			time.Sleep(10 * time.Second)
+			error = val.Run(ctx)
 		}
 	}
 }
