@@ -3,6 +3,7 @@ package mongodb
 import (
 	"context"
 
+	DB "github.com/ChengYen-Tang/binance-crawler/modules/database/interface"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,13 +15,13 @@ type database struct {
 	db     *mongo.Database
 }
 
-func New(url string, ctx context.Context) (database, error) {
+func New(url string, ctx context.Context) (DB.IDatabase, error) {
 	clientOptions := options.Client().ApplyURI(url)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		return database{}, err
+		return nil, err
 	}
-	return database{client: client, db: client.Database(dbName)}, nil
+	return &database{client: client, db: client.Database(dbName)}, nil
 }
 
 func (d *database) Close(ctx context.Context) error {

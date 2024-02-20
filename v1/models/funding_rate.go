@@ -8,7 +8,7 @@ type FundingRate struct {
 	MarkPrice   int64  `json:"markPrice"`
 }
 
-const FundingRateIndex = "FundingTime"
+const FundingRateIndex = "fundingtime"
 
 type FundingRateWorkIten struct {
 	apiName        *string

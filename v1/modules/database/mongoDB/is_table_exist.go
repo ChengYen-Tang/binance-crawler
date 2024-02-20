@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/ChengYen-Tang/binance-crawler/modules/database/utils"
-	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (d *database) IsTableExist(apiName *string, symbol *string, ctx context.Context) (bool, error) {
@@ -13,13 +13,16 @@ func (d *database) IsTableExist(apiName *string, symbol *string, ctx context.Con
 		return false, ping_error
 	}
 	tableName := utils.CombineTableName(apiName, symbol)
-	collection := d.db.Collection(tableName)
-	err := collection.FindOne(ctx, nil).Err()
-	if err == mongo.ErrNoDocuments {
-		return false, nil
-	}
+	collections, err := d.db.ListCollectionNames(ctx, bson.D{{}})
+	exists := false
 	if err != nil {
 		return false, err
 	}
-	return true, nil
+	for _, collection := range collections {
+		if collection == tableName {
+			exists = true
+			break
+		}
+	}
+	return exists, nil
 }

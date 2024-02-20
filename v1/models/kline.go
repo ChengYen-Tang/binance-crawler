@@ -16,7 +16,7 @@ type Kline struct {
 	TakerBuyQuoteAssetVolume string `json:"takerBuyQuoteAssetVolume"`
 }
 
-const KlineIndex = "OpenTime"
+const KlineIndex = "opentime"
 
 type KlineWorkIten struct {
 	apiName        *string

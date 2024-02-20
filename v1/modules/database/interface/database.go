@@ -16,4 +16,5 @@ type IDatabase interface {
 	InsertKlines(apiName *string, symbol *string, kline *[]models.Kline, ctx context.Context) error
 	InsertFundingRate(apiName *string, symbol *string, fundingRate *models.FundingRate, ctx context.Context) error
 	InsertFundingRates(apiName *string, symbol *string, fundingRate *[]models.FundingRate, ctx context.Context) error
+	Close(ctx context.Context) error
 }
