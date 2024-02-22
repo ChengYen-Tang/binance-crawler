@@ -16,22 +16,44 @@ type Kline struct {
 	TakerBuyQuoteAssetVolume string `json:"takerBuyQuoteAssetVolume"`
 }
 
+const KlineIndex = "opentime"
+
 type KlineWorkIten struct {
-	Kline *Kline
+	apiName        *string
+	symbol         *string
+	kline          *Kline
+	insertFunction func(apiName *string, symbol *string, kline *Kline, ctx context.Context) error
 }
 
-func (k *Kline) CreateSpotKlineWorkItem() IWorkItem {
-	return &KlineWorkIten{Kline: k}
+type KlinesWorkIten struct {
+	apiName        *string
+	symbol         *string
+	klines         *[]Kline
+	insertFunction func(apiName *string, symbol *string, klines *[]Kline, ctx context.Context) error
 }
 
-func (k *Kline) CreateFuturesKlineWorkItem() IWorkItem {
-	return &KlineWorkIten{Kline: k}
+func NewKlineWorkIten(apiName *string, symbol *string, kline *Kline, insertFunction func(apiName *string, symbol *string, kline *Kline, ctx context.Context) error) *KlineWorkIten {
+	return &KlineWorkIten{
+		apiName:        apiName,
+		symbol:         symbol,
+		kline:          kline,
+		insertFunction: insertFunction,
+	}
 }
 
-func (k *Kline) CreatePremiumIndexKlineWorkItem() IWorkItem {
-	return &KlineWorkIten{Kline: k}
+func NewKlinesWorkIten(apiName *string, symbol *string, klines *[]Kline, insertFunction func(apiName *string, symbol *string, klines *[]Kline, ctx context.Context) error) *KlinesWorkIten {
+	return &KlinesWorkIten{
+		apiName:        apiName,
+		symbol:         symbol,
+		klines:         klines,
+		insertFunction: insertFunction,
+	}
 }
 
-func (k *KlineWorkIten) Run(ctx context.Context) {
-	// do something
+func (k *KlineWorkIten) Run(ctx context.Context) error {
+	return k.insertFunction(k.apiName, k.symbol, k.kline, ctx)
+}
+
+func (k *KlinesWorkIten) Run(ctx context.Context) error {
+	return k.insertFunction(k.apiName, k.symbol, k.klines, ctx)
 }

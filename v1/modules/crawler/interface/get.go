@@ -1,8 +1,5 @@
 package crawler
 
-type IClient interface {
-}
-
 // IGet is an interface for getting data from the binance api
 type IGet interface {
 	// GetToNow gets data from the binance api from the start time to the current time
