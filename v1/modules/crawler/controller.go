@@ -36,104 +36,42 @@ func NewController(dbEndPoint *database.DBEndpoints, client *crawler.IClient, ch
 }
 
 func (controller *Controller) Run(ctx context.Context) {
-	controller.check(ctx)
+	controller.check(models.SpotKline, controller.dbEndPoint.GetKlineTimeRange, controller.dbEndPoint.CreateKlineTable, nil, ctx)
+	controller.check(models.USDFuturesKline, controller.dbEndPoint.GetKlineTimeRange, controller.dbEndPoint.CreateKlineTable, nil, ctx)
+	controller.check(models.USDFuturesPremiumIndexKline, controller.dbEndPoint.GetKlineTimeRange, controller.dbEndPoint.CreateKlineTable, nil, ctx)
+	controller.check(models.USDFuturesFundingRate, controller.dbEndPoint.GetFundingRateTimeRange, controller.dbEndPoint.CreateFundingRateTable, nil, ctx)
 }
 
-func (controller *Controller) check(ctx context.Context) error {
-	apiName := models.SpotKline
+func (controller *Controller) check(
+	apiName string,
+	getTimeRange func(apiName *string, symbol *string, ctx context.Context) (*int64, *int64, error),
+	createTable func(apiName *string, symbol *string, ctx context.Context) error,
+	getter crawler.IGet,
+	ctx context.Context) error {
 	for _, symbol := range controller.params.Symbols {
 		isTableExist, err := controller.dbEndPoint.IsTableExist(&apiName, &symbol, ctx)
 		if err != nil {
 			return err
 		}
 
-		var (
-			firstTime *int64
-			lastTime  *int64
-		)
+		startTime := controller.params.StartTime.UnixMilli()
+		var endtime *int64
 
 		if isTableExist {
-			firstTime, lastTime, err = controller.dbEndPoint.GetKlineTimeRange(&apiName, &symbol, ctx)
+			endtime, _, err = getTimeRange(&apiName, &symbol, ctx)
 		} else {
-			err = controller.dbEndPoint.CreateKlineTable(&apiName, &symbol, ctx)
-			startTime := controller.params.StartTime.UnixMilli()
-			firstTime = &startTime
+			err = createTable(&apiName, &symbol, ctx)
 		}
 		if err != nil {
 			return err
 		}
-	}
-	apiName = models.USDFuturesKline
-	for _, symbol := range controller.params.Symbols {
-		isTableExist, err := controller.dbEndPoint.IsTableExist(&apiName, &symbol, ctx)
-		if err != nil {
-			return err
+
+		if endtime == nil {
+			err = getter.GetToNow(&startTime)
+		} else if *endtime > startTime {
+			err = getter.Get(&startTime, endtime)
 		}
 
-		var (
-			firstTime *int64
-			lastTime  *int64
-		)
-
-		if isTableExist {
-			firstTime, lastTime, err = controller.dbEndPoint.GetKlineTimeRange(&apiName, &symbol, ctx)
-		} else {
-			err = controller.dbEndPoint.CreateKlineTable(&apiName, &symbol, ctx)
-			startTime := controller.params.StartTime.UnixMilli()
-			firstTime = &startTime
-		}
-		if err != nil {
-			return err
-		}
-	}
-	apiName = models.USDFuturesPremiumIndexKline
-	for _, symbol := range controller.params.Symbols {
-		isTableExist, err := controller.dbEndPoint.IsTableExist(&apiName, &symbol, ctx)
-		if err != nil {
-			return err
-		}
-
-		var (
-			firstTime *int64
-			lastTime  *int64
-		)
-
-		if isTableExist {
-			firstTime, lastTime, err = controller.dbEndPoint.GetKlineTimeRange(&apiName, &symbol, ctx)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = controller.dbEndPoint.CreateKlineTable(&apiName, &symbol, ctx)
-			startTime := controller.params.StartTime.UnixMilli()
-			firstTime = &startTime
-		}
-		if err != nil {
-			return err
-		}
-	}
-	apiName = models.USDFuturesFundingRate
-	for _, symbol := range controller.params.Symbols {
-		isTableExist, err := controller.dbEndPoint.IsTableExist(&apiName, &symbol, ctx)
-		if err != nil {
-			return err
-		}
-
-		var (
-			firstTime *int64
-			lastTime  *int64
-		)
-
-		if isTableExist {
-			firstTime, lastTime, err = controller.dbEndPoint.GetFundingRateTimeRange(&apiName, &symbol, ctx)
-			if err != nil {
-				return err
-			}
-		} else {
-			err = controller.dbEndPoint.CreateFundingRateTable(&apiName, &symbol, ctx)
-			startTime := controller.params.StartTime.UnixMilli()
-			firstTime = &startTime
-		}
 		if err != nil {
 			return err
 		}
