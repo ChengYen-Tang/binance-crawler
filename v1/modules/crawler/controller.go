@@ -35,7 +35,7 @@ func NewController(dbEndPoint *database.DBEndpoints, client *crawler.IClient, ch
 	}
 }
 
-func (controller *Controller) Run(ctx context.Context) {
+func (controller *Controller) Check(ctx context.Context) {
 	controller.check(models.SpotKline, controller.dbEndPoint.GetKlineTimeRange, controller.dbEndPoint.CreateKlineTable, nil, ctx)
 	controller.check(models.USDFuturesKline, controller.dbEndPoint.GetKlineTimeRange, controller.dbEndPoint.CreateKlineTable, nil, ctx)
 	controller.check(models.USDFuturesPremiumIndexKline, controller.dbEndPoint.GetKlineTimeRange, controller.dbEndPoint.CreateKlineTable, nil, ctx)
@@ -72,6 +72,34 @@ func (controller *Controller) check(
 			err = getter.Get(&startTime, endtime)
 		}
 
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (controller *Controller) Run(ctx context.Context) {
+	controller.run(models.SpotKline, controller.dbEndPoint.GetKlineLastTime, nil, ctx)
+	controller.run(models.USDFuturesKline, controller.dbEndPoint.GetKlineLastTime, nil, ctx)
+	controller.run(models.USDFuturesPremiumIndexKline, controller.dbEndPoint.GetKlineLastTime, nil, ctx)
+	controller.run(models.USDFuturesFundingRate, controller.dbEndPoint.GetFundingRateLastTime, nil, ctx)
+}
+
+func (controller *Controller) run(
+	apiName string,
+	getLastTime func(apiName *string, symbol *string, ctx context.Context) (*int64, error),
+	getter crawler.IGet,
+	ctx context.Context) error {
+	for _, symbol := range controller.params.Symbols {
+
+		startTime, err := getLastTime(&apiName, &symbol, ctx)
+		if err != nil {
+			return err
+		}
+
+		err = getter.GetToNow(startTime)
 		if err != nil {
 			return err
 		}

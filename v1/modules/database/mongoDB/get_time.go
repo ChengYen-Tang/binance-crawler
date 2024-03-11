@@ -59,3 +59,49 @@ func (d *database) GetTableTimeRange(apiName *string, symbol *string, index stri
 	// Return the result
 	return &minOpenTime, &maxOpenTime, nil
 }
+
+func (d *database) GetKlineLastTime(apiName *string, symbol *string, ctx context.Context) (*int64, error) {
+	return d.GetTableLastTime(apiName, symbol, models.KlineIndex, ctx)
+}
+
+func (d *database) GetFundingRateLastTime(apiName *string, symbol *string, ctx context.Context) (*int64, error) {
+	return d.GetTableLastTime(apiName, symbol, models.FundingRateIndex, ctx)
+}
+
+func (d *database) GetTableLastTime(apiName *string, symbol *string, index string, ctx context.Context) (*int64, error) {
+	maxOpenTime := int64(0)
+	ping_error := d.Ping(ctx)
+	if ping_error != nil {
+		return &maxOpenTime, ping_error
+	}
+
+	pipeline := mongo.Pipeline{
+		{{Key: "$group", Value: bson.D{
+			{Key: "_id", Value: nil},
+			{Key: "maxOpenTime", Value: bson.D{{Key: "$max", Value: fmt.Sprintf("$%s", index)}}},
+		}}},
+		{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 0},
+			{Key: "maxOpenTime", Value: 1},
+		}}},
+	}
+
+	tableName := utils.CombineTableName(apiName, symbol)
+	collection := d.db.Collection(tableName)
+	// Execute the aggregation
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return &maxOpenTime, err
+	}
+	defer cursor.Close(ctx)
+
+	// Decode the result
+	var result []bson.M
+	if err = cursor.All(ctx, &result); err != nil {
+		return &maxOpenTime, err
+	}
+
+	maxOpenTime = result[0]["maxOpenTime"].(int64)
+	// Return the result
+	return &maxOpenTime, nil
+}
