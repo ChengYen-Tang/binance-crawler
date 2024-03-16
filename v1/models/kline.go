@@ -17,6 +17,7 @@ type Kline struct {
 }
 
 const KlineIndex = "opentime"
+const KlineCloseTimeKey = "closetime"
 
 type KlineWorkIten struct {
 	apiName        *string
