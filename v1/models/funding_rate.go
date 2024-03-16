@@ -3,9 +3,9 @@ package models
 import "context"
 
 type FundingRate struct {
-	FundingRate string `json:"fundingRate"`
-	FundingTime int64  `json:"fundingTime"`
-	MarkPrice   int64  `json:"markPrice"`
+	FundingRate float64 `json:"fundingRate"`
+	FundingTime int64   `json:"fundingTime"`
+	MarkPrice   float64 `json:"markPrice"`
 }
 
 const FundingRateIndex = "fundingtime"

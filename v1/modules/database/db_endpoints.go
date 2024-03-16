@@ -35,3 +35,11 @@ func (endpoint *DBEndpoints) GetKlineTimeRange(apiName *string, symbol *string, 
 func (endpoint *DBEndpoints) GetFundingRateTimeRange(apiName *string, symbol *string, ctx context.Context) (firstTime *int64, lastTime *int64, error error) {
 	return endpoint.dbInstance.GetFundingRateTimeRange(apiName, symbol, ctx)
 }
+
+func (endpoint *DBEndpoints) GetKlineLastTime(apiName *string, symbol *string, ctx context.Context) (*int64, error) {
+	return endpoint.dbInstance.GetKlineLastTime(apiName, symbol, ctx)
+}
+
+func (endpoint *DBEndpoints) GetFundingRateLastTime(apiName *string, symbol *string, ctx context.Context) (*int64, error) {
+	return endpoint.dbInstance.GetFundingRateLastTime(apiName, symbol, ctx)
+}
