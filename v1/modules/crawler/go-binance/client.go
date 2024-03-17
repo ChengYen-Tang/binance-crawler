@@ -14,7 +14,7 @@ type BinanceClient struct {
 // NewClient creates a new instance of IClient
 func NewClient(apiKey, secretKey string) crawler.IClient {
 	return &BinanceClient{
-		SpotClient:    binance.NewClient("", ""),
-		FuturesClient: futures.NewClient("", ""),
+		SpotClient:    binance.NewClient(apiKey, secretKey),
+		FuturesClient: futures.NewClient(apiKey, secretKey),
 	}
 }

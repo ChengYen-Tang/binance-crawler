@@ -14,7 +14,7 @@ import (
 // Controller is a struct for controlling the crawler
 type Controller struct {
 	dbEndPoint *database.DBEndpoints
-	client     *crawler.IClient
+	client     crawler.IClient
 	channel    *chan iModel.IWorkItem
 	factory    *factory.WorkItemFactory
 	getters    *[]crawler.IGet
@@ -22,7 +22,7 @@ type Controller struct {
 }
 
 // New creates a new instance of Controller
-func NewController(dbEndPoint *database.DBEndpoints, client *crawler.IClient, channel *chan iModel.IWorkItem, factory *factory.WorkItemFactory, params *parameter.ControllerParams) *Controller {
+func NewController(dbEndPoint *database.DBEndpoints, client crawler.IClient, channel *chan iModel.IWorkItem, factory *factory.WorkItemFactory, params *parameter.ControllerParams) *Controller {
 	getters := &[]crawler.IGet{}
 
 	return &Controller{
@@ -48,7 +48,7 @@ func (controller *Controller) check(
 	createTable func(apiName *string, symbol *string, ctx context.Context) error,
 	getter crawler.IGet,
 	ctx context.Context) error {
-	for _, symbol := range controller.params.Symbols {
+	for _, symbol := range *controller.params.Symbols {
 		isTableExist, err := controller.dbEndPoint.IsTableExist(&apiName, &symbol, ctx)
 		if err != nil {
 			return err
@@ -92,7 +92,7 @@ func (controller *Controller) run(
 	getLastTime func(apiName *string, symbol *string, ctx context.Context) (*int64, error),
 	getter crawler.IGet,
 	ctx context.Context) error {
-	for _, symbol := range controller.params.Symbols {
+	for _, symbol := range *controller.params.Symbols {
 
 		startTime, err := getLastTime(&apiName, &symbol, ctx)
 		if err != nil {
