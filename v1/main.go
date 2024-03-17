@@ -25,7 +25,8 @@ func main() {
 	ctx := context.Background()
 	db, err := mongodb.New(configuration.DbConnectionString, ctx)
 	if err != nil {
-		panic(err)
+		fmt.Println("error:", err)
+		return
 	}
 	endpoints := database.NewEndpoints(db)
 	client := go_binance.NewClient("", "")
